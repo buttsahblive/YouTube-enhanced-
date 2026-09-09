@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 
@@ -9,6 +8,30 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 app.use(express.json());
+
+// Enable CORS and normalize Vercel serverless rewritten paths
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  // When Vercel serverless function rewrites /api/(.*) to /api, restore the original path
+  if (req.originalUrl && req.originalUrl !== req.url && req.originalUrl.startsWith("/api")) {
+    req.url = req.originalUrl;
+  }
+  next();
+});
+
+// Quick API Health Check
+app.get("/api", (_req, res) => {
+  res.json({ status: "ok", service: "YouTube Enhanced API", timestamp: new Date().toISOString() });
+});
+app.get("/api/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "AIzaSyB4tmNyTwLiyQ1K7vi5lYAAA4TItgg7mGc";
 
@@ -293,7 +316,16 @@ app.get("/api/youtube/trending", async (req, res) => {
     // Filter fallback if category provided
     let filtered = CURATED_FALLBACK_VIDEOS;
     if (category && category !== "All") {
-      const matched = CURATED_FALLBACK_VIDEOS.filter(v => v.category.toLowerCase() === category.toLowerCase());
+      const catLower = category.toLowerCase().trim();
+      const matched = CURATED_FALLBACK_VIDEOS.filter(v => {
+        const vCat = (v.category || "").toLowerCase().trim();
+        return vCat === catLower ||
+               (catLower.includes("coding") && vCat.includes("coding")) ||
+               (catLower.includes("music") && vCat.includes("music")) ||
+               (catLower.includes("education") && vCat.includes("education")) ||
+               (catLower.includes("gaming") && vCat.includes("gaming")) ||
+               (catLower.includes("ai") && (vCat.includes("ai") || vCat.includes("coding")));
+      });
       if (matched.length > 0) filtered = matched;
     }
     setCached(cacheKey, filtered);
@@ -733,6 +765,7 @@ JSON only with keys: "optimizedTitles", "tags", "seoAdvice"`;
 // Vite middleware or static serving
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",

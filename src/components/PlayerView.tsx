@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Video, VideoComment } from "../types";
+import { loadVideoComments } from "../services/videoService";
 import {
   formatViews,
   formatPublishedDate,
@@ -20,6 +21,7 @@ import {
   ChevronUp,
   Send,
   Bot,
+  ExternalLink,
 } from "lucide-react";
 
 interface PlayerViewProps {
@@ -100,11 +102,10 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
     setUserQuery("");
 
     setIsLoadingComments(true);
-    fetch(`/api/youtube/comments/${video.id}`)
-      .then((res) => res.json())
+    loadVideoComments(video.id)
       .then((data) => {
-        if (data.comments) {
-          setComments(data.comments);
+        if (data && data.length > 0) {
+          setComments(data);
         }
       })
       .catch((err) => console.error("Comments error:", err))
@@ -218,7 +219,7 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
           <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl border border-stone-800">
             <iframe
               ref={iframeRef}
-              src={`https://www.youtube.com/embed/${video.id}?autoplay=1&enablejsapi=1`}
+              src={`https://www.youtube.com/embed/${video.id}?autoplay=1&enablejsapi=1&rel=0`}
               title={video.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
@@ -333,6 +334,17 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                   <Clock className="w-3.5 h-3.5" />
                   <span>{isWatchLater ? "Saved" : "Save"}</span>
                 </button>
+
+                <a
+                  href={`https://www.youtube.com/watch?v=${video.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border bg-stone-800 text-stone-200 border-stone-700 hover:bg-stone-700 transition-colors"
+                  title="Watch directly on YouTube"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>YouTube</span>
+                </a>
               </div>
             </div>
 

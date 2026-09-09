@@ -11,6 +11,7 @@ import { MiniPlayer } from "./components/MiniPlayer";
 import { AuthModal } from "./components/AuthModal";
 import { AIAssistantModal } from "./components/AIAssistantModal";
 import { SearchConsoleModal } from "./components/SearchConsoleModal";
+import { loadVideos, getLocalFallbackVideos } from "./services/videoService";
 import { initAuth, googleSignIn, logout, setCachedAccessToken } from "./services/googleAuth";
 import {
   testFirestoreConnection,
@@ -172,21 +173,19 @@ export default function App() {
     };
   }, []);
 
-  // Fetch Videos (Trending or Category)
+  // Fetch Videos (Trending or Category) with triple fallback (API -> Direct -> Curated)
   const fetchVideos = async (cat: string, query?: string) => {
     setIsLoadingVideos(true);
     try {
-      let endpoint = `/api/youtube/trending?category=${encodeURIComponent(cat)}`;
-      if (query && query.trim()) {
-        endpoint = `/api/youtube/search?q=${encodeURIComponent(query.trim())}`;
-      }
-      const res = await fetch(endpoint);
-      const data = await res.json();
-      if (data.videos && Array.isArray(data.videos)) {
-        setVideos(data.videos);
+      const videoList = await loadVideos(cat, query);
+      if (videoList && Array.isArray(videoList) && videoList.length > 0) {
+        setVideos(videoList);
+      } else {
+        setVideos(getLocalFallbackVideos(cat, query));
       }
     } catch (err) {
       console.error("Failed to load videos:", err);
+      setVideos(getLocalFallbackVideos(cat, query));
     } finally {
       setIsLoadingVideos(false);
     }
