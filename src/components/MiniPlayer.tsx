@@ -14,7 +14,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   onClose,
 }) => {
   return (
-    <div className="fixed bottom-4 right-4 z-40 w-80 bg-stone-900 border border-stone-700 rounded-xl shadow-2xl overflow-hidden flex flex-col animate-slide-up">
+    <div className="fixed bottom-16 sm:bottom-4 right-3 sm:right-4 z-40 w-72 sm:w-80 bg-stone-900 border border-stone-700 rounded-xl shadow-2xl overflow-hidden flex flex-col animate-slide-up">
       <div className="relative aspect-video w-full bg-black">
         <iframe
           src={`https://www.youtube.com/embed/${video.id}?autoplay=1&mute=1&enablejsapi=1`}

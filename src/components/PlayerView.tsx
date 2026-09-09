@@ -22,7 +22,9 @@ import {
   Send,
   Bot,
   ExternalLink,
+  Download,
 } from "lucide-react";
+import { DownloadModal } from "./DownloadModal";
 
 interface PlayerViewProps {
   video: Video;
@@ -77,6 +79,9 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
   // Copy share feedback
   const [copiedLink, setCopiedLink] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  // Video download modal state
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
 
   // Player iframe ref
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -211,12 +216,12 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-4">
-      <div className="grid gap-6 lg:grid-cols-3">
+    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-3 sm:py-4">
+      <div className="grid gap-5 lg:grid-cols-3">
         {/* Left 2 Cols: Main Player, Controls & Tabbed Content */}
         <div className="lg:col-span-2">
           {/* Main Video Embed */}
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-2xl border border-stone-800">
+          <div className="relative aspect-video w-full rounded-xl sm:rounded-2xl overflow-hidden bg-black shadow-2xl border border-stone-800">
             <iframe
               ref={iframeRef}
               src={`https://www.youtube.com/embed/${video.id}?autoplay=1&enablejsapi=1&rel=0`}
@@ -309,11 +314,22 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                 </button>
               </div>
 
-              {/* Action Buttons: Like, Watch Later */}
-              <div className="flex items-center gap-2">
+              {/* Action Buttons: Like, Watch Later, Download, YouTube (Horizontally scrollable on mobile) */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto py-1 touch-momentum">
+                {/* Download Button */}
+                <button
+                  id="video-player-download-btn"
+                  onClick={() => setShowDownloadModal(true)}
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white shadow-sm transition-all cursor-pointer shrink-0"
+                  title="Download MP4 video or MP3 audio directly to your device files"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download</span>
+                </button>
+
                 <button
                   onClick={() => onToggleLike(video)}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer shrink-0 ${
                     isLiked
                       ? "bg-red-600/20 text-red-300 border-red-700/60"
                       : "bg-stone-800 text-stone-200 border-stone-700 hover:bg-stone-700"
@@ -325,7 +341,7 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
 
                 <button
                   onClick={() => onToggleWatchLater(video)}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer shrink-0 ${
                     isWatchLater
                       ? "bg-red-600/20 text-red-300 border-red-700/60"
                       : "bg-stone-800 text-stone-200 border-stone-700 hover:bg-stone-700"
@@ -339,12 +355,42 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                   href={`https://www.youtube.com/watch?v=${video.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border bg-stone-800 text-stone-200 border-stone-700 hover:bg-stone-700 transition-colors"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border bg-stone-800 text-stone-200 border-stone-700 hover:bg-stone-700 transition-colors shrink-0"
                   title="Watch directly on YouTube"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>YouTube</span>
                 </a>
+              </div>
+            </div>
+
+            {/* Quick Download Strip Under Video */}
+            <div className="mt-3 bg-gradient-to-r from-emerald-950/40 via-stone-900 to-stone-900 border border-emerald-800/40 rounded-xl p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                  <Download className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-white flex items-center gap-2">
+                    <span>Download MP4 Video / MP3</span>
+                    <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-1.5 py-0.2 rounded font-semibold uppercase">
+                      Direct to Files App
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-400 mt-0.5">
+                    1080p Full HD, 720p HD, 480p, 360p ya MP3 audio quality choose karke download karein
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowDownloadModal(true)}
+                  className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-98 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Choose Quality & Download</span>
+                </button>
               </div>
             </div>
 
@@ -379,11 +425,11 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
           </div>
 
           {/* TABBED MODULE: AI Summary & Comments */}
-          <div className="mt-6">
-            <div className="flex items-center gap-2 border-b border-stone-800 pb-2">
+          <div className="mt-5 sm:mt-6">
+            <div className="flex items-center gap-2 border-b border-stone-800 pb-2 overflow-x-auto no-scrollbar touch-momentum">
               <button
                 onClick={() => setActiveTab("ai")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 cursor-pointer ${
                   activeTab === "ai"
                     ? "bg-amber-600/20 text-amber-300 border border-amber-700/50"
                     : "text-stone-400 hover:text-white hover:bg-stone-800/60"
@@ -395,7 +441,7 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
 
               <button
                 onClick={() => setActiveTab("comments")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 cursor-pointer ${
                   activeTab === "comments"
                     ? "bg-stone-800 text-white"
                     : "text-stone-400 hover:text-white hover:bg-stone-800/60"
@@ -645,6 +691,13 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Video & Audio Download Modal */}
+      <DownloadModal
+        isOpen={showDownloadModal}
+        onClose={() => setShowDownloadModal(false)}
+        video={video}
+      />
     </div>
   );
 };

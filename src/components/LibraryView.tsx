@@ -43,13 +43,13 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6">
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
       {/* Header & Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-stone-800">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 pb-4 border-b border-stone-800">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full sm:w-auto py-1 touch-momentum">
           <button
             onClick={() => setActiveTab("history")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-colors shrink-0 cursor-pointer ${
               activeTab === "history"
                 ? "bg-red-600/20 text-red-300 border border-red-700/50"
                 : "text-stone-400 hover:text-white hover:bg-stone-800"
@@ -61,7 +61,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
           <button
             onClick={() => setActiveTab("liked")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-colors shrink-0 cursor-pointer ${
               activeTab === "liked"
                 ? "bg-red-600/20 text-red-300 border border-red-700/50"
                 : "text-stone-400 hover:text-white hover:bg-stone-800"
@@ -73,7 +73,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
           <button
             onClick={() => setActiveTab("watch-later")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+            className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-colors shrink-0 cursor-pointer ${
               activeTab === "watch-later"
                 ? "bg-red-600/20 text-red-300 border border-red-700/50"
                 : "text-stone-400 hover:text-white hover:bg-stone-800"

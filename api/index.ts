@@ -817,44 +817,10 @@ JSON only with keys: "optimizedTitles", "tags", "seoAdvice"`;
   }
 });
 
-// Google Search Console Verification Endpoints
-let verificationCode = process.env.GOOGLE_SITE_VERIFICATION || "google08535f3aa485e30d";
-
-router.get("/seo/verification", (_req, res) => {
-  res.json({
-    token: verificationCode,
-    metaHtml: verificationCode
-      ? `<meta name="google-site-verification" content="${verificationCode}" />`
-      : null,
-  });
-});
-
-router.post("/seo/verification", (req, res) => {
-  const { token } = req.body;
-  verificationCode = (token || "").trim();
-  res.json({
-    success: true,
-    token: verificationCode,
-    message: "Verification token updated.",
-  });
-});
-
 // Mount router on "/api"
-// For sub-paths like /youtube, /gemini, /seo support them directly, but NEVER intercept root "/"
+// For sub-paths like /youtube, /gemini support them directly, but NEVER intercept root "/"
 app.use("/api", router);
-app.use(["/youtube", "/gemini", "/seo"], router);
-
-// Google Search Console HTML verification file handler
-app.get("/google08535f3aa485e30d.html", (_req, res) => {
-  res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.send("google-site-verification: google08535f3aa485e30d.html");
-});
-
-app.get(/^\/google([a-zA-Z0-9_-]+)\.html$/, (req, res) => {
-  const fileId = req.params[0];
-  res.setHeader("Content-Type", "text/html; charset=utf-8");
-  res.send(`google-site-verification: google${fileId}.html`);
-});
+app.use(["/youtube", "/gemini"], router);
 
 // Dynamic sitemap.xml endpoint
 const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>

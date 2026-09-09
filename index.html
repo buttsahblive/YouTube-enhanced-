@@ -2,15 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
     <title>YouTube Enhanced</title>
-    <meta name="description" content="An enhanced YouTube web application with Gemini AI Studio video assistant and SEO optimizer, Google Search Console owner verification, channel management, instant video uploads, and personalized library synchronization." />
-    <!-- Google Search Console Owner Verification -->
-    <meta name="google-site-verification" content="google08535f3aa485e30d" id="google-site-verification-meta" />
+    <meta name="description" content="An enhanced YouTube web application with direct MP4 video and MP3 audio downloads to your Files app, Gemini AI video assistant, channel management, and seamless playback." />
+    
+    <!-- Mobile Web App Optimization -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Fast YouTube CDN Preconnects for Instant Thumbnail Loading -->
+    <link rel="preconnect" href="https://i.ytimg.com" crossorigin />
+    <link rel="dns-prefetch" href="https://i.ytimg.com" />
+    <link rel="preconnect" href="https://www.youtube.com" />
+    
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#00A2E8" />
+
     <meta property="og:title" content="YouTube Enhanced" />
-    <meta property="og:description" content="An enhanced YouTube web application with Gemini AI Studio video assistant and SEO optimizer, Google Search Console owner verification, channel management, instant video uploads, and personalized library synchronization." />
+    <meta property="og:description" content="An enhanced YouTube web application with direct MP4 video and MP3 audio downloads to your Files app, Gemini AI video assistant, channel management, and seamless playback." />
+    <meta property="og:image" content="https://youtubeenhanced.vercel.app/logo.png" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://youtubeenhanced.vercel.app/logo.png" />
   </head>
   <body>
     <div id="root"></div>

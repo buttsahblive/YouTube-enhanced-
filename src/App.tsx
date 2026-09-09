@@ -8,9 +8,9 @@ import { PlayerView } from "./components/PlayerView";
 import { LibraryView } from "./components/LibraryView";
 import { ChannelStudioView } from "./components/ChannelStudioView";
 import { MiniPlayer } from "./components/MiniPlayer";
+import { MobileBottomNav } from "./components/MobileBottomNav";
 import { AuthModal } from "./components/AuthModal";
 import { AIAssistantModal } from "./components/AIAssistantModal";
-import { SearchConsoleModal } from "./components/SearchConsoleModal";
 import { loadVideos, getLocalFallbackVideos } from "./services/videoService";
 import { initAuth, googleSignIn, logout, setCachedAccessToken } from "./services/googleAuth";
 import {
@@ -88,9 +88,8 @@ export default function App() {
   // Floating Mini-Player State
   const [showMiniPlayer, setShowMiniPlayer] = useState(false);
 
-  // Gemini AI Studio & Search Console Modals
+  // Gemini AI Studio Assistant Modal
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-  const [isSearchConsoleModalOpen, setIsSearchConsoleModalOpen] = useState(false);
 
   // Save changes to localStorage
   useEffect(() => {
@@ -315,7 +314,6 @@ export default function App() {
         currentView={currentView}
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onOpenAIModal={() => setIsAIModalOpen(true)}
-        onOpenSearchConsole={() => setIsSearchConsoleModalOpen(true)}
       />
 
       {/* Main Layout Area */}
@@ -323,6 +321,7 @@ export default function App() {
         {/* Left Sidebar */}
         <Sidebar
           isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
           activeView={currentView}
           onNavigate={handleNavigate}
           selectedCategory={selectedCategory}
@@ -333,11 +332,10 @@ export default function App() {
           likedCount={likedVideos.length}
           historyCount={history.length}
           onOpenAIModal={() => setIsAIModalOpen(true)}
-          onOpenSearchConsole={() => setIsSearchConsoleModalOpen(true)}
         />
 
         {/* Dynamic Center Stage */}
-        <main className="flex-1 overflow-y-auto bg-stone-950 flex flex-col">
+        <main className="flex-1 overflow-y-auto bg-stone-950 flex flex-col pb-20 md:pb-6 touch-momentum">
           {authError && (
             <div className="w-full max-w-7xl mx-auto px-4 pt-3">
               {authError.includes("unauthorized-domain") ? (
@@ -412,7 +410,7 @@ export default function App() {
 
           {/* VIEW: Home / Search Feed */}
           {currentView === "home" && (
-            <div className="w-full max-w-7xl mx-auto px-4 py-4 space-y-4">
+            <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-4">
               {/* Category Chips Bar */}
               <CategoryChips
                 categories={CATEGORIES}
@@ -424,56 +422,56 @@ export default function App() {
               />
 
               {/* Extra Feature Spotlight Banner */}
-              <div className="bg-gradient-to-r from-stone-900 via-stone-900 to-stone-850 border border-stone-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-md">
+              <div className="bg-gradient-to-r from-stone-900 via-stone-900 to-stone-850 border border-stone-800 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 shadow-md">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
-                    <Sparkles className="w-5 h-5" />
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
+                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
                       <span>YouTube Studio & Gemini AI Edition</span>
-                      <span className="text-[10px] bg-amber-950 text-amber-400 border border-amber-800/60 px-2 py-0.5 rounded-full font-semibold">
+                      <span className="text-[9px] sm:text-[10px] bg-amber-950 text-amber-400 border border-amber-800/60 px-2 py-0.5 rounded-full font-semibold">
                         Gemini Powered
                       </span>
                     </h3>
-                    <p className="text-xs text-stone-400 mt-0.5">
-                      High-definition YouTube playback, intelligent Gemini AI question answering, and integrated YouTube Channel Studio.
+                    <p className="text-[11px] sm:text-xs text-stone-400 mt-0.5 leading-relaxed">
+                      High-definition YouTube playback, direct MP4 & MP3 downloads to your Files app, and Gemini AI assistant.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
                   <button
                     onClick={() => handleNavigate("channel")}
-                    className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow"
+                    className="flex-1 sm:flex-none justify-center px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow cursor-pointer"
                   >
                     <span>My Channel</span>
                   </button>
 
                   <button
                     onClick={() => setIsAIModalOpen(true)}
-                    className="px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 text-xs font-semibold rounded-lg border border-amber-600/40 flex items-center gap-1.5 transition-colors"
+                    className="flex-1 sm:flex-none justify-center px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 text-xs font-semibold rounded-lg border border-amber-600/40 flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <Bot className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Gemini AI Assistant</span>
+                    <span>Gemini AI</span>
                   </button>
                 </div>
               </div>
 
               {/* Videos Feed Header */}
               <div className="flex items-center justify-between pt-1">
-                <h2 className="text-base font-bold text-stone-200 flex items-center gap-2">
+                <h2 className="text-sm sm:text-base font-bold text-stone-200 flex items-center gap-2">
                   <Compass className="w-4 h-4 text-red-500" />
-                  <span>
+                  <span className="truncate">
                     {searchQuery
-                      ? `Search results for "${searchQuery}"`
+                      ? `Results for "${searchQuery}"`
                       : selectedCategory === "All"
                       ? "Recommended & Trending"
                       : `${selectedCategory} Videos`}
                   </span>
                 </h2>
-                <span className="text-xs text-stone-500">
-                  {videos.length} videos available
+                <span className="text-xs text-stone-500 shrink-0">
+                  {videos.length} videos
                 </span>
               </div>
 
@@ -494,7 +492,7 @@ export default function App() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
                   {videos.map((video) => (
                     <VideoCard
                       key={video.id}
@@ -589,10 +587,11 @@ export default function App() {
         currentVideo={currentVideo}
       />
 
-      {/* Google Search Console Owner Verification Modal */}
-      <SearchConsoleModal
-        isOpen={isSearchConsoleModalOpen}
-        onClose={() => setIsSearchConsoleModalOpen(false)}
+      {/* Mobile Bottom Navigation Bar (Docked on phones) */}
+      <MobileBottomNav
+        currentView={currentView}
+        onNavigate={handleNavigate}
+        onOpenAIModal={() => setIsAIModalOpen(true)}
       />
     </div>
   );

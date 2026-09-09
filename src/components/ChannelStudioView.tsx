@@ -141,10 +141,10 @@ export const ChannelStudioView: React.FC<ChannelStudioViewProps> = ({
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
       {/* Channel Header Banner */}
       {channel && channel.bannerImageUrl && (
-        <div className="w-full h-36 md:h-48 rounded-2xl overflow-hidden border border-stone-800 relative bg-stone-900">
+        <div className="w-full h-28 sm:h-36 md:h-48 rounded-xl sm:rounded-2xl overflow-hidden border border-stone-800 relative bg-stone-900">
           <img
             src={channel.bannerImageUrl}
             alt="Channel Banner"
@@ -154,9 +154,9 @@ export const ChannelStudioView: React.FC<ChannelStudioViewProps> = ({
       )}
 
       {/* Channel Profile & Stats Overview */}
-      <div className="bg-stone-900 border border-stone-800 rounded-2xl p-6 relative overflow-hidden">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-4">
+      <div className="bg-stone-900 border border-stone-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 relative z-10">
+          <div className="flex items-center gap-3.5 sm:gap-4">
             <img
               src={
                 channel?.thumbnails?.high ||
@@ -165,19 +165,19 @@ export const ChannelStudioView: React.FC<ChannelStudioViewProps> = ({
                 "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80"
               }
               alt={channel?.title || user.displayName || "Channel"}
-              className="w-20 h-20 rounded-full border-2 border-red-500 object-cover shadow-lg"
+              className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-2 border-red-500 object-cover shadow-lg shrink-0"
               referrerPolicy="no-referrer"
             />
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-white">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-base sm:text-xl font-bold text-white">
                   {channel?.title || user.displayName || "My YouTube Channel"}
                 </h1>
                 <span className="text-[10px] bg-red-600/20 text-red-400 border border-red-500/40 px-2 py-0.5 rounded-full font-bold">
                   Active Channel
                 </span>
               </div>
-              <p className="text-xs text-stone-400 mt-1 max-w-xl">
+              <p className="text-xs text-stone-400 mt-1 max-w-xl line-clamp-2 sm:line-clamp-none">
                 {channel?.description || "Manage your video catalog, upload new releases, and track audience performance directly from YouTube Enhanced Studio."}
               </p>
               {channel?.customUrl && (
@@ -188,11 +188,11 @@ export const ChannelStudioView: React.FC<ChannelStudioViewProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 w-full md:w-auto justify-end">
+          <div className="flex items-center gap-2 w-full md:w-auto justify-start sm:justify-end overflow-x-auto no-scrollbar py-1">
             <button
               onClick={loadChannelData}
               disabled={isLoading}
-              className="p-2 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-xl transition-colors"
+              className="p-2 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-xl transition-colors cursor-pointer shrink-0"
               title="Refresh Channel Data"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
@@ -203,7 +203,7 @@ export const ChannelStudioView: React.FC<ChannelStudioViewProps> = ({
                 href={`https://www.youtube.com/channel/${channel.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3.5 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                className="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0"
               >
                 <span>View on YouTube</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -212,7 +212,7 @@ export const ChannelStudioView: React.FC<ChannelStudioViewProps> = ({
 
             <button
               onClick={() => setIsUploadOpen(true)}
-              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 transition-all shadow-lg"
+              className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs flex items-center gap-2 transition-all shadow-lg cursor-pointer shrink-0"
             >
               <Upload className="w-4 h-4" />
               <span>Upload Video</span>
