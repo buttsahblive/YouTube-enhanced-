@@ -839,10 +839,10 @@ router.post("/seo/verification", (req, res) => {
   });
 });
 
-// Mount router on BOTH "/api" AND "/"
-// This ensures requests work whether Vercel passes `/api/youtube/trending` or `/youtube/trending`
+// Mount router on "/api"
+// For sub-paths like /youtube, /gemini, /seo support them directly, but NEVER intercept root "/"
 app.use("/api", router);
-app.use("/", router);
+app.use(["/youtube", "/gemini", "/seo"], router);
 
 // Google Search Console HTML verification file handler
 app.get("/google08535f3aa485e30d.html", (_req, res) => {
@@ -854,6 +854,112 @@ app.get(/^\/google([a-zA-Z0-9_-]+)\.html$/, (req, res) => {
   const fileId = req.params[0];
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.send(`google-site-verification: google${fileId}.html`);
+});
+
+// Dynamic sitemap.xml endpoint
+const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=All</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Coding%20%26%20Tech</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=AI%20%26%20Machine%20Learning</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Music</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Education</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Gaming</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Podcasts</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=bMknfKXIFA8</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=aircAruvnKk</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=W6NZfCO5SIk</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=kqtD5dpn9C8</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=zjkBMFhNj_g</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=M576WGiDBdQ</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=D8hkY_f1lH8</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>`;
+
+app.get(["/sitemap.xml", "/api/sitemap.xml"], (_req, res) => {
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.send(SITEMAP_XML);
+});
+
+app.get(["/robots.txt", "/api/robots.txt"], (_req, res) => {
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.send(`User-agent: *\nAllow: /\n\nSitemap: https://youtubeenhanced.vercel.app/sitemap.xml\n`);
 });
 
 export default app;

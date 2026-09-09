@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+  <!-- Homepage -->
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Categories -->
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=All</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Coding%20%26%20Tech</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=AI%20%26%20Machine%20Learning</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Music</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Education</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Gaming</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?category=Podcasts</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Featured Videos with Video Metadata for Google Search & Video Rich Snippets -->
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=bMknfKXIFA8</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/bMknfKXIFA8/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>React 19 Full Course – Master Modern Web Development</video:title>
+      <video:description>Complete guide to modern React 19: Server Components, Actions, useActionState, useOptimistic, and performance patterns.</video:description>
+      <video:player_loc>https://www.youtube.com/embed/bMknfKXIFA8</video:player_loc>
+      <video:duration>2712</video:duration>
+      <video:publication_date>2024-11-15T10:00:00Z</video:publication_date>
+      <video:uploader>TechCode Academy</video:uploader>
+    </video:video>
+  </url>
+
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=aircAruvnKk</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/aircAruvnKk/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>Neural Networks from Scratch in Python and TypeScript</video:title>
+      <video:description>Building backpropagation, gradient descent, activation functions, and layer forward passes completely from scratch.</video:description>
+      <video:player_loc>https://www.youtube.com/embed/aircAruvnKk</video:player_loc>
+      <video:duration>2090</video:duration>
+      <video:publication_date>2023-04-02T13:00:00Z</video:publication_date>
+      <video:uploader>3Blue1Brown Insights</video:uploader>
+    </video:video>
+  </url>
+
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=W6NZfCO5SIk</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/W6NZfCO5SIk/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>JavaScript Tutorial for Beginners: Learn JavaScript in 1 Hour</video:title>
+      <video:description>Master the fundamentals of JavaScript in this comprehensive beginner tutorial by Programming with Mosh.</video:description>
+      <video:player_loc>https://www.youtube.com/embed/W6NZfCO5SIk</video:player_loc>
+      <video:duration>2896</video:duration>
+      <video:publication_date>2024-01-10T15:00:00Z</video:publication_date>
+      <video:uploader>Programming with Mosh</video:uploader>
+    </video:video>
+  </url>
+
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=kqtD5dpn9C8</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/kqtD5dpn9C8/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>Python for Beginners – Full Course [Programming Tutorial]</video:title>
+      <video:description>Learn Python from zero to mastery in this hands-on course covering variables, loops, functions, and OOP.</video:description>
+      <video:player_loc>https://www.youtube.com/embed/kqtD5dpn9C8</video:player_loc>
+      <video:duration>3600</video:duration>
+      <video:publication_date>2023-08-20T12:00:00Z</video:publication_date>
+      <video:uploader>Programming with Mosh</video:uploader>
+    </video:video>
+  </url>
+
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=zjkBMFhNj_g</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/zjkBMFhNj_g/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>[1hr Talk] Intro to Large Language Models</video:title>
+      <video:description>Andrej Karpathy gives a comprehensive 1-hour introduction to Large Language Models (LLMs), training pipelines, and capabilities.</video:description>
+      <video:player_loc>https://www.youtube.com/embed/zjkBMFhNj_g</video:player_loc>
+      <video:duration>3585</video:duration>
+      <video:publication_date>2023-11-22T18:00:00Z</video:publication_date>
+      <video:uploader>Andrej Karpathy</video:uploader>
+    </video:video>
+  </url>
+
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=M576WGiDBdQ</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/M576WGiDBdQ/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>The Incredible Physics of Sailing Faster Than the Wind</video:title>
+      <video:description>How can a sailboat move faster than the wind that propels it? Deep dive into aerofoils, apparent wind velocity, and hydrodynamics.</video:description>
+      <video:player_loc>https://www.youtube.com/embed/M576WGiDBdQ</video:player_loc>
+      <video:duration>1180</video:duration>
+      <video:publication_date>2021-05-28T14:30:00Z</video:publication_date>
+      <video:uploader>Veritasium</video:uploader>
+    </video:video>
+  </url>
+
+  <url>
+    <loc>https://youtubeenhanced.vercel.app/?v=D8hkY_f1lH8</loc>
+    <lastmod>2026-09-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <video:video>
+      <video:thumbnail_loc>https://i.ytimg.com/vi/D8hkY_f1lH8/hqdefault.jpg</video:thumbnail_loc>
+      <video:title>Grand Theft Auto VI Trailer 1</video:title>
+      <video:description>Official trailer for Grand Theft Auto VI heading to the state of Leonida.</video:description>
+      <video:player_loc>https://www.youtube.com/embed/D8hkY_f1lH8</video:player_loc>
+      <video:duration>91</video:duration>
+      <video:publication_date>2023-12-04T23:00:00Z</video:publication_date>
+      <video:uploader>Rockstar Games</video:uploader>
+    </video:video>
+  </url>
+</urlset>
