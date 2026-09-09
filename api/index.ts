@@ -1,6 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 import { GoogleGenAI } from "@google/genai";
+import { startDownloadJob, getJob } from "./downloader";
 
 dotenv.config();
 
@@ -814,6 +817,131 @@ JSON only with keys: "optimizedTitles", "tags", "seoAdvice"`;
     });
   } catch (err: any) {
     return res.status(500).json({ error: err?.message || "Optimization error" });
+  }
+});
+
+// ==========================================
+// IN-APP NATIVE DOWNLOADER ENDPOINTS
+// ==========================================
+
+// 1. Start or poll a download job
+router.get("/youtube/download/start", (req, res) => {
+  try {
+    const videoId = (req.query.id as string) || "";
+    const format = ((req.query.format as string) === "mp3" ? "mp3" : "mp4") as "mp4" | "mp3";
+    const quality = (req.query.quality as string) || (format === "mp3" ? "320kbps" : "720p");
+    const title = (req.query.title as string) || "Video";
+
+    if (!videoId) {
+      return res.status(400).json({ error: "Missing video id" });
+    }
+
+    const job = startDownloadJob({ videoId, format, quality, title });
+    return res.json({
+      success: true,
+      jobId: job.id,
+      stage: job.stage,
+      progress: job.progressPercent,
+      error: job.error,
+      downloadUrl: job.stage === "complete" ? `/api/youtube/download/file/${job.id}` : null,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err?.message || "Failed to initiate download job" });
+  }
+});
+
+// 2. Poll progress status of a download job
+router.get("/youtube/download/status/:jobId", (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+    const job = getJob(jobId);
+    if (!job) {
+      return res.status(404).json({ error: "Download job not found or expired" });
+    }
+
+    return res.json({
+      success: true,
+      jobId: job.id,
+      stage: job.stage,
+      progress: job.progressPercent,
+      error: job.error,
+      fileSize: job.fileSize,
+      downloadUrl: job.stage === "complete" ? `/api/youtube/download/file/${job.id}` : null,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err?.message || "Status query failed" });
+  }
+});
+
+// 3. Serve completed media file directly to device
+router.get("/youtube/download/file/:jobId", (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+    const job = getJob(jobId);
+    if (!job || !job.outputFile || !fs.existsSync(job.outputFile)) {
+      return res.status(404).json({ error: "Download file not ready or expired" });
+    }
+
+    const ext = job.format === "mp3" ? "mp3" : "mp4";
+    const contentType = ext === "mp3" ? "audio/mpeg" : "video/mp4";
+    const cleanTitle = (job.title || "video").replace(/[^a-zA-Z0-9_-]/g, "_");
+    const downloadFileName = `${cleanTitle}_${job.quality}.${ext}`;
+
+    res.setHeader("Content-Disposition", `attachment; filename="${downloadFileName}"`);
+    res.setHeader("Content-Type", contentType);
+
+    return res.download(job.outputFile, downloadFileName, (err) => {
+      if (err && !res.headersSent) {
+        console.error("Error sending file:", err);
+      }
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err?.message || "File download error" });
+  }
+});
+
+// 4. Direct synchronous stream trigger
+router.get("/youtube/download/direct", async (req, res) => {
+  try {
+    const videoId = (req.query.id as string) || "";
+    const format = ((req.query.format as string) === "mp3" ? "mp3" : "mp4") as "mp4" | "mp3";
+    const quality = (req.query.quality as string) || (format === "mp3" ? "320kbps" : "720p");
+    const title = (req.query.title as string) || "Video";
+
+    if (!videoId) {
+      return res.status(400).json({ error: "Missing video id" });
+    }
+
+    const job = startDownloadJob({ videoId, format, quality, title });
+
+    // Wait up to 30 seconds for completion if already starting
+    const startTime = Date.now();
+    while (Date.now() - startTime < 35000) {
+      if (job.stage === "complete" && job.outputFile && fs.existsSync(job.outputFile)) {
+        const ext = job.format === "mp3" ? "mp3" : "mp4";
+        const contentType = ext === "mp3" ? "audio/mpeg" : "video/mp4";
+        const cleanTitle = (job.title || "video").replace(/[^a-zA-Z0-9_-]/g, "_");
+        const downloadFileName = `${cleanTitle}_${job.quality}.${ext}`;
+
+        res.setHeader("Content-Disposition", `attachment; filename="${downloadFileName}"`);
+        res.setHeader("Content-Type", contentType);
+        return res.download(job.outputFile, downloadFileName);
+      }
+      if (job.stage === "failed") {
+        return res.status(500).json({ error: job.error || "Download processing failed" });
+      }
+      await new Promise((r) => setTimeout(r, 800));
+    }
+
+    // If still in progress after 35s, return the status URL so client continues polling
+    return res.json({
+      status: "processing",
+      jobId: job.id,
+      progress: job.progressPercent,
+      statusUrl: `/api/youtube/download/status/${job.id}`,
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err?.message || "Direct download failed" });
   }
 });
 

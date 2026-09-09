@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Download,
   X,
   Film,
   Music,
   CheckCircle2,
-  ExternalLink,
   ShieldCheck,
   HardDrive,
-  Check,
   Sparkles,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Zap,
 } from "lucide-react";
 import { Video } from "../types";
 import { formatViews } from "../utils/formatters";
@@ -36,29 +38,29 @@ const VIDEO_QUALITIES: QualityOption<VideoQuality>[] = [
   {
     id: "1080p",
     label: "1080p Full HD",
-    subLabel: "1920 × 1080 • Maximum Clarity",
-    sizeEstimate: "~95 - 180 MB",
+    subLabel: "1920 × 1080 • Best High Quality",
+    sizeEstimate: "~75 - 150 MB",
     badge: "FHD",
   },
   {
     id: "720p",
     label: "720p HD",
-    subLabel: "1280 × 720 • Smooth & Clear",
-    sizeEstimate: "~45 - 85 MB",
+    subLabel: "1280 × 720 • Smooth & Fast",
+    sizeEstimate: "~35 - 70 MB",
     badge: "Popular",
   },
   {
     id: "480p",
     label: "480p SD",
     subLabel: "854 × 480 • Standard Quality",
-    sizeEstimate: "~25 - 45 MB",
+    sizeEstimate: "~18 - 35 MB",
   },
   {
     id: "360p",
-    label: "360p Data Saver",
-    subLabel: "640 × 360 • Quick & Compact",
-    sizeEstimate: "~12 - 25 MB",
-    badge: "Fast",
+    label: "360p Instant",
+    subLabel: "640 × 360 • Quickest Download",
+    sizeEstimate: "~10 - 20 MB",
+    badge: "Fastest",
   },
 ];
 
@@ -66,7 +68,7 @@ const AUDIO_QUALITIES: QualityOption<AudioQuality>[] = [
   {
     id: "320kbps",
     label: "320 kbps MP3",
-    subLabel: "Ultra High Quality Audio",
+    subLabel: "Studio High Quality Audio",
     sizeEstimate: "~8 - 14 MB",
     badge: "HQ",
   },
@@ -95,113 +97,200 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
     useState<VideoQuality>("720p");
   const [selectedAudioQuality, setSelectedAudioQuality] =
     useState<AudioQuality>("320kbps");
+
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [downloadStatus, setDownloadStatus] = useState<string>("");
   const [isDone, setIsDone] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [downloadedFileName, setDownloadedFileName] = useState<string>("");
+
+  const pollIntervalRef = useRef<any>(null);
+
+  useEffect(() => {
+    // Clear state on modal close or new video
+    if (!isOpen) {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      setIsDownloading(false);
+      setDownloadProgress(0);
+      setDownloadStatus("");
+      setIsDone(false);
+      setDownloadError(null);
+    }
+  }, [isOpen, video.id]);
 
   if (!isOpen) return null;
 
-  // Clean filename for the downloaded file
+  const currentQuality = format === "mp4" ? selectedVideoQuality : selectedAudioQuality;
   const sanitizedTitle =
     video.title
       .replace(/[\\/:*?"<>|]/g, "")
       .trim()
       .slice(0, 50) || "video";
 
-  const handleStartDownload = () => {
-    setIsDownloading(true);
-    setDownloadProgress(15);
-    setDownloadStatus("Connecting to media stream...");
-    setIsDone(false);
-
-    // Progress simulation while preparing stream
+  // Trigger browser's native file download without opening new tabs
+  const triggerNativeDownload = (fileUrl: string, fileName: string) => {
+    const a = document.createElement("a");
+    a.href = fileUrl;
+    a.download = fileName;
+    // Invisible trigger to avoid navigating away
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
     setTimeout(() => {
-      setDownloadProgress(45);
-      setDownloadStatus(
-        format === "mp4"
-          ? `Encoding ${selectedVideoQuality} MP4 video file...`
-          : `Extracting ${selectedAudioQuality} MP3 audio track...`
-      );
-    }, 600);
-
-    setTimeout(() => {
-      setDownloadProgress(80);
-      setDownloadStatus("Finalizing file for your Files app...");
-    }, 1200);
-
-    setTimeout(() => {
-      setDownloadProgress(100);
-      setDownloadStatus("Saving to Files / Downloads folder...");
-      setIsDone(true);
-
-      // Trigger actual download
-      triggerFileDownload();
-
-      setTimeout(() => {
-        setIsDownloading(false);
-      }, 1500);
-    }, 1800);
+      document.body.removeChild(a);
+    }, 2000);
   };
 
-  const triggerFileDownload = () => {
-    const isUserUploaded = !!video.videoUrl;
+  const handleStartDownload = async () => {
+    setIsDownloading(true);
+    setDownloadProgress(8);
+    setDownloadStatus("Connecting to Native In-App Downloader...");
+    setIsDone(false);
+    setDownloadError(null);
 
-    if (isUserUploaded && video.videoUrl) {
-      // Direct download from user uploaded file URL
-      const a = document.createElement("a");
-      a.href = video.videoUrl;
-      a.download = `${sanitizedTitle}_${format === "mp4" ? selectedVideoQuality : selectedAudioQuality}.${format}`;
-      a.target = "_blank";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } else {
-      // For YouTube video:
-      // Construct direct high-speed fallback & converter download trigger
-      const directTargetUrl =
-        format === "mp3"
-          ? `https://www.y2mate.com/youtube-mp3/${video.id}`
-          : `https://ssyoutube.com/watch?v=${video.id}`;
+    // Case 1: Custom User-Uploaded Video (from Studio)
+    if (video.videoUrl) {
+      setTimeout(() => {
+        setDownloadProgress(50);
+        setDownloadStatus("Preparing direct local file...");
+      }, 300);
 
-      // Open download stream in background tab or new window to initiate native device file save
-      const link = document.createElement("a");
-      link.href = directTargetUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      setTimeout(() => {
+        setDownloadProgress(100);
+        setDownloadStatus("Saved directly to your device!");
+        setIsDone(true);
+        setIsDownloading(false);
+        const fileName = `${sanitizedTitle}_${currentQuality}.${format}`;
+        setDownloadedFileName(fileName);
+        triggerNativeDownload(video.videoUrl!, fileName);
+      }, 800);
+      return;
+    }
+
+    // Case 2: YouTube Video via our own native backend service
+    try {
+      setDownloadProgress(15);
+      setDownloadStatus("Initializing stream extraction on server...");
+
+      const startRes = await fetch(
+        `/api/youtube/download/start?id=${encodeURIComponent(video.id)}&format=${format}&quality=${currentQuality}&title=${encodeURIComponent(sanitizedTitle)}`
+      );
+
+      if (!startRes.ok) {
+        throw new Error(`Server returned status ${startRes.status}`);
+      }
+
+      const startData = await startRes.json();
+
+      if (startData.error) {
+        throw new Error(startData.error);
+      }
+
+      const jobId = startData.jobId;
+
+      // If already finished and cached
+      if (startData.stage === "complete" && startData.downloadUrl) {
+        setDownloadProgress(100);
+        setDownloadStatus("File ready! Saving to your device...");
+        setIsDone(true);
+        setIsDownloading(false);
+        const fileName = `${sanitizedTitle}_${currentQuality}.${format}`;
+        setDownloadedFileName(fileName);
+        triggerNativeDownload(startData.downloadUrl, fileName);
+        return;
+      }
+
+      // Poll progress every 600ms
+      let attempts = 0;
+      pollIntervalRef.current = setInterval(async () => {
+        attempts++;
+        if (attempts > 120) {
+          // 72 seconds max timeout
+          clearInterval(pollIntervalRef.current);
+          setIsDownloading(false);
+          setDownloadError("Download took too long. Please try 360p Fast Mode or MP3.");
+          return;
+        }
+
+        try {
+          const pollRes = await fetch(`/api/youtube/download/status/${jobId}`);
+          if (!pollRes.ok) return;
+
+          const pollData = await pollRes.json();
+
+          if (pollData.stage === "downloading") {
+            setDownloadProgress(Math.max(20, pollData.progress || 35));
+            setDownloadStatus(
+              format === "mp4"
+                ? `Downloading ${currentQuality} video stream (${pollData.progress || 35}%)...`
+                : `Extracting high-clarity audio stream (${pollData.progress || 35}%)...`
+            );
+          } else if (pollData.stage === "converting") {
+            setDownloadProgress(Math.max(85, pollData.progress || 90));
+            setDownloadStatus(
+              format === "mp4"
+                ? `Muxing & finalizing ${currentQuality} MP4 file...`
+                : `Encoding high quality MP3 file...`
+            );
+          } else if (pollData.stage === "complete" && pollData.downloadUrl) {
+            clearInterval(pollIntervalRef.current);
+            setDownloadProgress(100);
+            setDownloadStatus("Complete! Download started in your browser.");
+            setIsDone(true);
+            setIsDownloading(false);
+
+            const fileName = `${sanitizedTitle}_${currentQuality}.${format}`;
+            setDownloadedFileName(fileName);
+            triggerNativeDownload(pollData.downloadUrl, fileName);
+          } else if (pollData.stage === "failed") {
+            clearInterval(pollIntervalRef.current);
+            setIsDownloading(false);
+            setDownloadError(
+              pollData.error || "This specific video has playback restrictions on server."
+            );
+          }
+        } catch (e: any) {
+          console.warn("Poll check error:", e.message);
+        }
+      }, 650);
+    } catch (err: any) {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+      setIsDownloading(false);
+      setDownloadError(err?.message || "Failed to connect to internal downloader.");
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
       <div
         id="video-download-modal"
-        className="bg-stone-900 border border-stone-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="bg-stone-900 border border-stone-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]"
       >
         {/* Modal Header */}
-        <div className="p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/70">
+        <div className="p-3.5 sm:p-4 border-b border-stone-800 flex items-center justify-between bg-stone-950/80">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center">
               <Download className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                <span>Download to Files App</span>
-                <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-1.5 py-0.2 rounded font-semibold uppercase">
-                  MP4 / MP3
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white">
+                  APNA Downloader
+                </h3>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.5 rounded-full font-bold flex items-center gap-1">
+                  <Zap className="w-2.5 h-2.5 text-emerald-400" />
+                  Direct In-App
                 </span>
-              </h3>
+              </div>
               <p className="text-[11px] text-stone-400">
-                Choose video quality & format to save directly onto your device
+                Direct phone / PC download • Kisi or website per jane ki zaroorat nahi
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-stone-800 rounded-lg text-stone-400 hover:text-white transition-colors"
+            className="p-1.5 hover:bg-stone-800 rounded-lg text-stone-400 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -217,7 +306,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                 `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`
               }
               alt={video.title}
-              className="w-24 h-16 rounded-lg object-cover shrink-0 border border-stone-800"
+              className="w-20 sm:w-24 h-14 sm:h-16 rounded-lg object-cover shrink-0 border border-stone-800"
             />
             <div className="min-w-0 flex-1">
               <h4 className="font-semibold text-white text-xs line-clamp-2 leading-snug">
@@ -236,12 +325,16 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
           {/* Format Selection (MP4 Video vs MP3 Audio) */}
           <div>
             <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-2">
-              Select Format
+              1. Choose Format
             </label>
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
-                onClick={() => setFormat("mp4")}
+                onClick={() => {
+                  setFormat("mp4");
+                  setDownloadError(null);
+                }}
+                disabled={isDownloading}
                 className={`p-3 rounded-xl border flex items-center gap-2.5 transition-all cursor-pointer ${
                   format === "mp4"
                     ? "bg-emerald-600/20 border-emerald-500 text-white shadow-sm ring-1 ring-emerald-500"
@@ -261,18 +354,22 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                   <div className="font-bold text-xs flex items-center gap-1.5">
                     <span>MP4 Video</span>
                     <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-semibold">
-                      Full Video
+                      HD Video
                     </span>
                   </div>
                   <p className="text-[10px] text-stone-400">
-                    High-Definition with Audio
+                    Video with clear sound
                   </p>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => setFormat("mp3")}
+                onClick={() => {
+                  setFormat("mp3");
+                  setDownloadError(null);
+                }}
+                disabled={isDownloading}
                 className={`p-3 rounded-xl border flex items-center gap-2.5 transition-all cursor-pointer ${
                   format === "mp3"
                     ? "bg-emerald-600/20 border-emerald-500 text-white shadow-sm ring-1 ring-emerald-500"
@@ -306,7 +403,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
           {/* Quality Selection Grid */}
           <div>
             <label className="text-[11px] font-bold text-stone-300 uppercase tracking-wider block mb-2">
-              Select Quality / Resolution
+              2. Select Quality / Resolution
             </label>
 
             {format === "mp4" ? (
@@ -317,7 +414,11 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                     <button
                       key={q.id}
                       type="button"
-                      onClick={() => setSelectedVideoQuality(q.id)}
+                      disabled={isDownloading}
+                      onClick={() => {
+                        setSelectedVideoQuality(q.id);
+                        setDownloadError(null);
+                      }}
                       className={`p-2.5 rounded-xl border text-left flex items-center justify-between gap-2 transition-all cursor-pointer ${
                         isSelected
                           ? "bg-stone-800 border-emerald-500 text-white ring-1 ring-emerald-500"
@@ -354,7 +455,11 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
                     <button
                       key={q.id}
                       type="button"
-                      onClick={() => setSelectedAudioQuality(q.id)}
+                      disabled={isDownloading}
+                      onClick={() => {
+                        setSelectedAudioQuality(q.id);
+                        setDownloadError(null);
+                      }}
                       className={`p-2.5 rounded-xl border text-left flex items-center justify-between gap-2 transition-all cursor-pointer ${
                         isSelected
                           ? "bg-stone-800 border-emerald-500 text-white ring-1 ring-emerald-500"
@@ -384,100 +489,156 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
             )}
           </div>
 
-          {/* Download Progress Status Bar */}
+          {/* Active Download Progress Box */}
           {isDownloading && (
-            <div className="p-3 bg-stone-950 border border-emerald-800/50 rounded-xl space-y-2">
+            <div className="p-3.5 bg-stone-950 border border-emerald-700/60 rounded-xl space-y-2.5 animate-fade-in shadow-inner">
               <div className="flex items-center justify-between text-xs font-semibold">
-                <span className="text-emerald-400 flex items-center gap-1.5">
-                  <Download className="w-3.5 h-3.5 animate-bounce" />
+                <span className="text-emerald-400 flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
                   <span>{downloadStatus}</span>
                 </span>
-                <span className="text-stone-400">{downloadProgress}%</span>
+                <span className="text-stone-300 font-mono font-bold">
+                  {downloadProgress}%
+                </span>
               </div>
-              <div className="w-full h-2 bg-stone-800 rounded-full overflow-hidden">
+              <div className="w-full h-2.5 bg-stone-800 rounded-full overflow-hidden p-0.5">
                 <div
-                  className="h-full bg-emerald-500 transition-all duration-300 rounded-full"
+                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-300 rounded-full"
                   style={{ width: `${downloadProgress}%` }}
                 />
               </div>
+              <p className="text-[10px] text-stone-400 flex items-center gap-1">
+                <span>Direct in-app processing: file will download directly into your browser without redirecting.</span>
+              </p>
             </div>
           )}
 
-          {/* Success / Files App Guidance */}
-          {isDone && (
-            <div className="p-3 bg-emerald-950/50 border border-emerald-700/60 rounded-xl flex items-start gap-2.5 text-emerald-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              <div className="text-[11px] leading-relaxed">
-                <p className="font-semibold text-emerald-300">
-                  Download initiated successfully!
-                </p>
-                <p className="text-stone-300 mt-0.5">
-                  File aapke mobile ya computer ke <strong>Downloads / Files app</strong> mein save ho jayegi.
-                </p>
+          {/* Download Error Alert & In-App Recovery */}
+          {downloadError && (
+            <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-xl space-y-2 animate-fade-in">
+              <div className="flex items-start gap-2 text-red-300 text-xs">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <div className="leading-relaxed">
+                  <p className="font-bold text-red-200">
+                    In-App Downloader Notice
+                  </p>
+                  <p className="text-[11px] text-stone-300 mt-0.5">
+                    {downloadError}
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-1 flex flex-wrap gap-2">
+                <button
+                  onClick={() => {
+                    setFormat("mp4");
+                    setSelectedVideoQuality("360p");
+                    setDownloadError(null);
+                    setTimeout(handleStartDownload, 50);
+                  }}
+                  className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Try 360p Fast Mode</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setFormat("mp3");
+                    setSelectedAudioQuality("128kbps");
+                    setDownloadError(null);
+                    setTimeout(handleStartDownload, 50);
+                  }}
+                  className="px-3 py-1.5 bg-purple-700 hover:bg-purple-600 text-white rounded-lg text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <Music className="w-3 h-3" />
+                  <span>Try MP3 Audio</span>
+                </button>
               </div>
             </div>
           )}
 
-          {/* Device & Files App Info */}
-          <div className="bg-stone-950/60 border border-stone-800/80 rounded-xl p-3 space-y-1.5 text-[11px] text-stone-400">
+          {/* Success State */}
+          {isDone && (
+            <div className="p-3.5 bg-emerald-950/60 border border-emerald-600/70 rounded-xl flex items-start gap-2.5 text-emerald-200 animate-fade-in">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+              <div className="text-[11px] leading-relaxed">
+                <p className="font-bold text-white text-xs">
+                  Downloading Started Directly!
+                </p>
+                <p className="text-stone-300 mt-0.5">
+                  File aapke phone ya computer ke <strong>Downloads / Files app</strong> mein save ho rahi hai. Kisi or website per jaane ki koi zaroorat nahi pari!
+                </p>
+                {downloadedFileName && (
+                  <p className="mt-1.5 text-emerald-300 font-mono text-[10px] truncate bg-emerald-900/40 px-2 py-1 rounded border border-emerald-700/50">
+                    Saved: {downloadedFileName}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Storage & Native File Notice */}
+          <div className="bg-stone-950/60 border border-stone-800 rounded-xl p-3 space-y-1.5 text-[11px] text-stone-400">
             <div className="flex items-center gap-1.5 font-semibold text-stone-300">
               <HardDrive className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Where will this file be stored?</span>
+              <span>Where does the file get saved?</span>
             </div>
-            <ul className="list-disc list-inside space-y-0.5 text-stone-400 pl-1">
+            <ul className="list-disc list-inside space-y-0.5 text-stone-400 pl-1 text-[10.5px]">
               <li>
-                <strong>Android:</strong> Saved directly in your phone's <em>Files / Downloads</em> folder.
+                <strong>Mobile (Android):</strong> Directly in your <em>Files / Downloads</em> folder.
               </li>
               <li>
-                <strong>iPhone/iPad:</strong> Open the built-in <em>Files app → Downloads</em>.
+                <strong>iPhone / iPad:</strong> Built-in <em>Files app → Downloads</em> tab.
               </li>
               <li>
-                <strong>PC / Mac / Laptop:</strong> Saved inside your browser's <em>Downloads</em> folder.
+                <strong>Laptop / Desktop:</strong> Browser's default <em>Downloads</em> folder.
               </li>
             </ul>
           </div>
         </div>
 
         {/* Modal Actions Footer */}
-        <div className="p-4 border-t border-stone-800 bg-stone-950 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-          {/* Direct External Mirrors */}
-          <div className="flex items-center gap-2 text-[11px] text-stone-400 w-full sm:w-auto">
-            <span className="hidden sm:inline">Alternate mirrors:</span>
-            <a
-              href={`https://ssyoutube.com/watch?v=${video.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-2.5 py-1 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg transition-colors inline-flex items-center gap-1"
-              title="Fast SaveFrom Mirror"
-            >
-              <span>Mirror 1</span>
-              <ExternalLink className="w-2.5 h-2.5 text-stone-500" />
-            </a>
-            <a
-              href={`https://www.y2mate.com/youtube/${video.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-2.5 py-1 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white rounded-lg transition-colors inline-flex items-center gap-1"
-              title="Y2Mate Converter Mirror"
-            >
-              <span>Mirror 2 (MP3/MP4)</span>
-              <ExternalLink className="w-2.5 h-2.5 text-stone-500" />
-            </a>
+        <div className="p-3.5 sm:p-4 border-t border-stone-800 bg-stone-950 flex items-center justify-between gap-3">
+          <div className="text-[11px] text-stone-400 hidden sm:flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>100% In-App • No ads • No redirects</span>
           </div>
 
-          {/* Main Download Button */}
-          <button
-            id="modal-confirm-download-btn"
-            onClick={handleStartDownload}
-            disabled={isDownloading}
-            className="w-full sm:w-auto px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-lg disabled:opacity-50 cursor-pointer"
-          >
-            <Download className="w-4 h-4" />
-            <span>
-              Download {format.toUpperCase()} (
-              {format === "mp4" ? selectedVideoQuality : selectedAudioQuality})
-            </span>
-          </button>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              onClick={onClose}
+              disabled={isDownloading}
+              className="px-4 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            >
+              {isDone ? "Close" : "Cancel"}
+            </button>
+
+            <button
+              id="modal-confirm-download-btn"
+              onClick={handleStartDownload}
+              disabled={isDownloading}
+              className="flex-1 sm:flex-initial px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-lg disabled:opacity-50 cursor-pointer"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Downloading...</span>
+                </>
+              ) : isDone ? (
+                <>
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Download Again</span>
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  <span>
+                    Download {format.toUpperCase()} ({currentQuality})
+                  </span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

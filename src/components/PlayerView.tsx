@@ -372,24 +372,25 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                 </div>
                 <div>
                   <div className="font-bold text-white flex items-center gap-2">
-                    <span>Download MP4 Video / MP3</span>
+                    <span>APNA Downloader (Direct Download)</span>
                     <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-1.5 py-0.2 rounded font-semibold uppercase">
-                      Direct to Files App
+                      100% In-App
                     </span>
                   </div>
                   <p className="text-[11px] text-stone-400 mt-0.5">
-                    1080p Full HD, 720p HD, 480p, 360p ya MP3 audio quality choose karke download karein
+                    1080p, 720p, 480p, 360p ya MP3 audio – bina kisi or website per jaye foran download karein
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
+                  id="choose-quality-download-btn"
                   onClick={() => setShowDownloadModal(true)}
                   className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-98 cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>Choose Quality & Download</span>
+                  <span>Download File Now</span>
                 </button>
               </div>
             </div>
