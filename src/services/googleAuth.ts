@@ -75,8 +75,12 @@ export const googleSignIn = async (
       ) {
         throw new Error("Sign-in popup was closed before completing.");
       }
-      // If error mentions invalid_request or scopes, retry with YouTube core scope
-      if (
+      if (popupErr.code === "auth/unauthorized-domain") {
+        const domain = typeof window !== "undefined" ? window.location.hostname : "your-app.vercel.app";
+        throw new Error(
+          `auth/unauthorized-domain: Domain "${domain}" is not added to Firebase Authorized Domains. Add "${domain}" in Firebase Console > Authentication > Settings > Authorized domains.`
+        );
+      } else if (
         popupErr.message?.includes("scopes") ||
         popupErr.message?.includes("invalid_request") ||
         popupErr.code === "auth/invalid-credential"

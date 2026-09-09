@@ -24,6 +24,7 @@ import {
   Code,
   Globe,
   Radio,
+  ExternalLink,
 } from "lucide-react";
 import {
   emailSignIn,
@@ -79,6 +80,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [copiedUid, setCopiedUid] = useState(false);
   const [copiedRaw, setCopiedRaw] = useState(false);
+  const [copiedDomain, setCopiedDomain] = useState(false);
 
   // Firestore profile state for signed-in user
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -361,9 +363,59 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         {/* Status Alerts */}
         {error && (
-          <div className="mx-6 mt-4 p-3 bg-red-950/60 border border-red-800/80 rounded-xl flex items-start gap-2.5 text-xs text-red-300 animate-fade-in">
-            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-            <span className="flex-1">{error}</span>
+          <div className="mx-6 mt-4 p-3.5 bg-red-950/70 border border-red-800/80 rounded-xl flex flex-col gap-2.5 text-xs text-red-300 animate-fade-in shadow-md">
+            <div className="flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <span className="flex-1 font-medium">{error}</span>
+            </div>
+
+            {error.includes("unauthorized-domain") && (
+              <div className="pt-2 border-t border-red-900/60 text-[11px] text-red-200/90 space-y-2">
+                <div className="font-semibold text-amber-300 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>How to authorize this domain in Firebase Console (1 minute):</span>
+                </div>
+                <ol className="list-decimal pl-4 space-y-1 text-stone-300">
+                  <li>
+                    Open Firebase Console:{" "}
+                    <a
+                      href="https://console.firebase.google.com/project/gen-lang-client-0124649179/authentication/settings"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline text-amber-300 hover:text-white font-semibold inline-flex items-center gap-1"
+                    >
+                      Authentication &gt; Settings &gt; Authorized domains
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </li>
+                  <li>Click <strong>&quot;Add domain&quot;</strong></li>
+                  <li className="flex items-center gap-2 flex-wrap">
+                    <span>Paste your current domain:</span>
+                    <code className="bg-black/60 px-2 py-0.5 rounded text-amber-300 font-mono text-[11px] border border-stone-800">
+                      {typeof window !== "undefined" ? window.location.hostname : "your-app.vercel.app"}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== "undefined") {
+                          navigator.clipboard.writeText(window.location.hostname);
+                          setCopiedDomain(true);
+                          setTimeout(() => setCopiedDomain(false), 2000);
+                        }
+                      }}
+                      className="px-2 py-0.5 bg-amber-900/80 hover:bg-amber-800 border border-amber-700/60 text-white rounded text-[10px] font-medium transition-colors inline-flex items-center gap-1"
+                    >
+                      {copiedDomain ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedDomain ? "Copied!" : "Copy Domain"}</span>
+                    </button>
+                  </li>
+                  <li>Click <strong>Save</strong>. Google sign-in will start working immediately!</li>
+                </ol>
+                <div className="bg-stone-900/80 border border-stone-800 rounded-lg p-2 text-[11px] text-stone-300">
+                  <strong className="text-white">Quick Alternative:</strong> You can create and log into your account using <strong>Email &amp; Password</strong> below right away without domain setup!
+                </div>
+              </div>
+            )}
           </div>
         )}
         {successMessage && (

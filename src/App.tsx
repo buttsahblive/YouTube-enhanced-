@@ -30,6 +30,9 @@ import {
   Compass,
   X,
   Bot,
+  Copy,
+  Check,
+  ExternalLink,
 } from "lucide-react";
 
 const CATEGORIES = [
@@ -78,6 +81,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [copiedAuthDomain, setCopiedAuthDomain] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [, setIsDbConnected] = useState(false);
 
@@ -336,18 +340,73 @@ export default function App() {
         <main className="flex-1 overflow-y-auto bg-stone-950 flex flex-col">
           {authError && (
             <div className="w-full max-w-7xl mx-auto px-4 pt-3">
-              <div className="bg-red-950/80 border border-red-800/80 text-red-200 text-xs px-4 py-2.5 rounded-xl flex items-center justify-between gap-3 shadow-lg animate-fade-in">
-                <div className="flex items-center gap-2 min-w-0">
-                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-                  <span className="truncate">{authError}</span>
+              {authError.includes("unauthorized-domain") ? (
+                <div className="bg-amber-950/70 border border-amber-800/80 text-amber-200 text-xs p-4 rounded-2xl shadow-xl animate-fade-in space-y-2.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2 font-semibold text-amber-300">
+                      <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                      <span>Firebase Authorization Required: Add Vercel Domain</span>
+                    </div>
+                    <button
+                      onClick={() => setAuthError(null)}
+                      className="p-1 hover:bg-amber-900/50 rounded-lg text-amber-400 hover:text-white transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-amber-200/90 leading-relaxed">
+                    Firebase blocks Google Sign-In popups on new domains until they are whitelisted. Add your current deployment domain to your Firebase project authorized domains list.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      onClick={() => {
+                        if (typeof window !== "undefined") {
+                          navigator.clipboard.writeText(window.location.hostname);
+                          setCopiedAuthDomain(true);
+                          setTimeout(() => setCopiedAuthDomain(false), 2000);
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-amber-900/90 hover:bg-amber-800 border border-amber-700/60 rounded-lg text-[11px] font-semibold text-amber-100 transition-colors inline-flex items-center gap-1.5 shadow-sm"
+                    >
+                      {copiedAuthDomain ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedAuthDomain ? "Domain Copied!" : `Copy: ${typeof window !== "undefined" ? window.location.hostname : "Domain"}`}</span>
+                    </button>
+
+                    <a
+                      href="https://console.firebase.google.com/project/gen-lang-client-0124649179/authentication/settings"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 bg-red-600 hover:bg-red-500 rounded-lg text-[11px] font-bold text-white transition-colors inline-flex items-center gap-1.5 shadow-sm"
+                    >
+                      <span>Open Firebase Authorized Domains</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+
+                    <button
+                      onClick={() => {
+                        setAuthError(null);
+                        setIsAuthModalOpen(true);
+                      }}
+                      className="px-3 py-1.5 bg-stone-800 hover:bg-stone-700 border border-stone-700 rounded-lg text-[11px] font-medium text-stone-200 transition-colors"
+                    >
+                      Sign in with Email &amp; Password instead
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => setAuthError(null)}
-                  className="p-1 hover:bg-red-900/50 rounded-lg text-red-300 hover:text-white transition-colors"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              ) : (
+                <div className="bg-red-950/80 border border-red-800/80 text-red-200 text-xs px-4 py-2.5 rounded-xl flex items-center justify-between gap-3 shadow-lg animate-fade-in">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                    <span className="truncate">{authError}</span>
+                  </div>
+                  <button
+                    onClick={() => setAuthError(null)}
+                    className="p-1 hover:bg-red-900/50 rounded-lg text-red-300 hover:text-white transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
