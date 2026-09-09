@@ -1,0 +1,6 @@
+{
+  "name": "YouTube Enhanced",
+  "description": "An enhanced YouTube web application with Gemini AI Studio video assistant and SEO optimizer, Google Search Console owner verification, channel management, instant video uploads, and personalized library synchronization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

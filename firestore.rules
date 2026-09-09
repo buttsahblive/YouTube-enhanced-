@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function isValidUser(data) {
+      return data.uid == request.auth.uid &&
+        data.email is string && data.email.size() <= 256 &&
+        (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+        (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 2048)) &&
+        (!('bio' in data) || (data.bio is string && data.bio.size() <= 500)) &&
+        (!('channelCustomName' in data) || (data.channelCustomName is string && data.channelCustomName.size() <= 100)) &&
+        (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 64)) &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64)) &&
+        (!('lastLoginAt' in data) || (data.lastLoginAt is string && data.lastLoginAt.size() <= 64)) &&
+        (!('emailVerified' in data) || (data.emailVerified is bool)) &&
+        (!('providerId' in data) || (data.providerId is string && data.providerId.size() <= 64)) &&
+        (!('preferences' in data) || (data.preferences is map)) &&
+        (!('stats' in data) || (data.stats is map));
+    }
+
+    function isValidLibraryItem(data) {
+      return data.userId == request.auth.uid &&
+        data.id is string && data.id.size() <= 128 &&
+        data.videoId is string && data.videoId.size() <= 64 &&
+        data.title is string && data.title.size() <= 300 &&
+        (data.type == 'history' || data.type == 'liked' || data.type == 'watchlater');
+    }
+
+    // User account profile documents
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) &&
+        request.resource.data.uid == resource.data.uid;
+      allow delete: if isOwner(userId);
+
+      // Subcollection: Library items (history, liked, watch later)
+      match /library/{itemId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidLibraryItem(request.resource.data);
+        allow update: if isOwner(userId) && isValidLibraryItem(request.resource.data) &&
+          request.resource.data.id == resource.data.id &&
+          request.resource.data.userId == resource.data.userId;
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read: if true;
+    }
+  }
+}

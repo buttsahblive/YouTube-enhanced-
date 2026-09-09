@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Comprehensive user account profile, preferences, and activity statistics stored in database",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "bio": { "type": "string" },
+        "channelCustomName": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "lastLoginAt": { "type": "string" },
+        "emailVerified": { "type": "boolean" },
+        "providerId": { "type": "string" },
+        "preferences": {
+          "type": "object",
+          "properties": {
+            "autoplay": { "type": "boolean" },
+            "defaultPlaybackSpeed": { "type": "number" },
+            "preferredCategory": { "type": "string" },
+            "theme": { "type": "string" },
+            "showCaptions": { "type": "boolean" }
+          }
+        },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "videosWatchedCount": { "type": "number" },
+            "likedVideosCount": { "type": "number" },
+            "watchLaterCount": { "type": "number" },
+            "lastWatchedVideoTitle": { "type": "string" }
+          }
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "UserLibraryItem": {
+      "title": "UserLibraryItem",
+      "description": "Videos saved to user history, liked, or watch later",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "videoId": { "type": "string" },
+        "title": { "type": "string" },
+        "channelTitle": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "duration": { "type": "string" },
+        "type": { "type": "string", "enum": ["history", "liked", "watchlater"] },
+        "savedAt": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["id", "videoId", "title", "type", "userId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user account profile information, preferences, and statistics"
+    },
+    "/users/{userId}/library/{itemId}": {
+      "schema": { "$ref": "#/entities/UserLibraryItem" },
+      "description": "Stores saved video history, liked videos, and watch later items"
+    }
+  }
+}
