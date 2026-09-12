@@ -12,9 +12,12 @@ import {
   AlertCircle,
   RefreshCw,
   Zap,
+  Smartphone,
+  ExternalLink,
 } from "lucide-react";
 import { Video } from "../types";
 import { formatViews } from "../utils/formatters";
+import { useIsRunningInApp } from "../utils/appDetection";
 
 interface DownloadModalProps {
   isOpen: boolean;
@@ -92,6 +95,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
   onClose,
   video,
 }) => {
+  const isRunningInApp = useIsRunningInApp();
   const [format, setFormat] = useState<FormatType>("mp4");
   const [selectedVideoQuality, setSelectedVideoQuality] =
     useState<VideoQuality>("720p");
@@ -595,6 +599,30 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
               </li>
             </ul>
           </div>
+
+          {/* Official Android App APK Option (Hidden if already in app) */}
+          {!isRunningInApp && (
+            <a
+              id="download-modal-apk-btn"
+              href="https://apkpure.com/p/app.youpro"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-emerald-950/40 to-stone-900 border border-emerald-500/30 hover:border-emerald-500/60 transition-all text-xs group cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                  <Smartphone className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="text-left">
+                  <span className="font-semibold text-stone-200 group-hover:text-emerald-300 transition-colors">
+                    Prefer the Native Android App?
+                  </span>
+                  <p className="text-[10.5px] text-stone-400">Download YouPro APK on APKPure</p>
+                </div>
+              </div>
+              <ExternalLink className="w-3.5 h-3.5 text-stone-400 group-hover:text-emerald-400 transition-colors shrink-0" />
+            </a>
+          )}
         </div>
 
         {/* Modal Actions Footer */}

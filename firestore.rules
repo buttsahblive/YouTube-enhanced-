@@ -62,6 +62,11 @@ service cloud.firestore {
           request.resource.data.userId == resource.data.userId;
         allow delete: if isOwner(userId);
       }
+
+      // Subcollection: Playback progress tracking (resuming videos)
+      match /playbackProgress/{videoId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // Connection test document

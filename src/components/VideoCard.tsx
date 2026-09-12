@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Video } from "../types";
 import { formatViews, formatPublishedDate } from "../utils/formatters";
 import { Clock, ThumbsUp, CheckCircle2 } from "lucide-react";
@@ -12,7 +12,7 @@ interface VideoCardProps {
   onToggleWatchLater?: (video: Video, e: React.MouseEvent) => void;
 }
 
-export const VideoCard: React.FC<VideoCardProps> = ({
+const VideoCardComponent: React.FC<VideoCardProps> = ({
   video,
   onSelectVideo,
   isLiked,
@@ -23,14 +23,14 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   return (
     <div
       onClick={() => onSelectVideo(video)}
-      className="group cursor-pointer flex flex-col gap-2.5 transition-transform duration-150 active:scale-[0.99] focus:outline-none"
+      className="group cursor-pointer flex flex-col gap-2.5 transition-transform duration-100 active:scale-[0.98] focus:outline-none"
     >
       {/* Thumbnail Container */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-stone-800 shadow-sm">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-stone-850 shadow-sm">
         <img
           src={video.thumbnail}
           alt={video.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-150"
           loading="lazy"
           decoding="async"
           referrerPolicy="no-referrer"
@@ -38,15 +38,19 @@ export const VideoCard: React.FC<VideoCardProps> = ({
 
         {/* Duration badge */}
         {video.duration && (
-          <div className="absolute bottom-2 right-2 bg-stone-950/85 text-stone-100 text-[11px] font-semibold px-1.5 py-0.5 rounded tracking-tight shadow backdrop-blur-xs">
+          <div className="absolute bottom-2 right-2 bg-stone-950/85 text-stone-100 text-[11px] font-semibold px-1.5 py-0.5 rounded tracking-tight shadow">
             {video.duration}
           </div>
         )}
 
         {/* Quick Action Overlay (Hover on Desktop, persistent icon on mobile if saved/liked) */}
-        <div className={`absolute top-2 right-2 flex items-center gap-1 p-1 rounded-lg backdrop-blur-sm transition-opacity ${
-          isLiked || isWatchLater ? "opacity-100 bg-stone-950/80" : "opacity-0 group-hover:opacity-100 bg-stone-950/70"
-        }`}>
+        <div
+          className={`absolute top-2 right-2 flex items-center gap-1 p-1 rounded-lg transition-opacity transform-gpu ${
+            isLiked || isWatchLater
+              ? "opacity-100 bg-stone-950/80"
+              : "opacity-0 group-hover:opacity-100 bg-stone-950/70"
+          }`}
+        >
           {onToggleWatchLater && (
             <button
               onClick={(e) => onToggleWatchLater(video, e)}
@@ -78,7 +82,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
       {/* Metadata */}
       <div className="flex gap-2.5 sm:gap-3 px-0.5">
         {/* Channel Avatar Placeholder / Icon */}
-        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-stone-700 text-stone-300 font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-stone-800">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-stone-800 text-stone-300 font-bold text-xs flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-stone-800">
           {video.channelTitle ? video.channelTitle.charAt(0).toUpperCase() : "Y"}
         </div>
 
@@ -107,3 +111,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
     </div>
   );
 };
+
+export const VideoCard = memo(VideoCardComponent);
+

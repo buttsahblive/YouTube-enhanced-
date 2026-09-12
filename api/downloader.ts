@@ -108,6 +108,12 @@ export function startDownloadJob(options: {
 
   // Build arguments for yt-dlp
   const ytDlpPath = path.resolve("./bin/yt-dlp");
+  try {
+    if (fs.existsSync(ytDlpPath)) {
+      fs.chmodSync(ytDlpPath, 0o755);
+    }
+  } catch {}
+
   const args: string[] = [
     "--ffmpeg-location",
     "/usr/bin/ffmpeg",

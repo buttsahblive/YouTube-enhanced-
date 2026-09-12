@@ -55,3 +55,23 @@ export interface UserProfile {
   stats?: UserStats;
 }
 
+export interface AISummaryChapter {
+  timestamp: string;
+  seconds: number;
+  title: string;
+}
+
+export interface AISummary {
+  overview: string;
+  keyTakeaways: string[];
+  actionItems: string[];
+  chapters?: AISummaryChapter[];
+}
+
+export interface AIQuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}
+

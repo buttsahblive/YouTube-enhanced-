@@ -6,7 +6,10 @@ import {
   ThumbsUp,
   FolderHeart,
   Trash2,
+  Smartphone,
+  ExternalLink,
 } from "lucide-react";
+import { useIsRunningInApp } from "../utils/appDetection";
 
 interface LibraryViewProps {
   history: Video[];
@@ -25,6 +28,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   onClearHistory,
   initialTab = "history",
 }) => {
+  const isRunningInApp = useIsRunningInApp();
   const [activeTab, setActiveTab] = useState<"history" | "liked" | "watch-later">(
     initialTab
   );
@@ -85,10 +89,25 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {!isRunningInApp && (
+            <a
+              id="library-download-app-btn"
+              href="https://apkpure.com/p/app.youpro"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-600/40 text-xs rounded-lg font-medium transition-colors cursor-pointer"
+              title="Download YouPro Android App APK on APKPure"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Download Android App</span>
+              <ExternalLink className="w-3 h-3 text-emerald-500/70" />
+            </a>
+          )}
+
           {activeTab === "history" && history.length > 0 && (
             <button
               onClick={onClearHistory}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs rounded-lg transition-colors cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Clear History</span>

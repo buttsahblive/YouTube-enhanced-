@@ -313,3 +313,54 @@ export async function fetchUserLibraryFromFirestore(
     return [];
   }
 }
+
+/**
+ * Save video playback timestamp progress to Firestore (synced every 5 seconds)
+ */
+export async function saveVideoPlaybackProgress(
+  userId: string,
+  videoId: string,
+  timestampSeconds: number,
+  videoTitle?: string
+): Promise<void> {
+  if (!userId || !videoId) return;
+  try {
+    const docRef = doc(db, "users", userId, "playbackProgress", videoId);
+    await setDoc(
+      docRef,
+      {
+        videoId,
+        timestampSeconds,
+        videoTitle: videoTitle || "",
+        updatedAt: new Date().toISOString(),
+        userId,
+      },
+      { merge: true }
+    );
+  } catch (err) {
+    console.warn("[Firestore] Error syncing video progress:", err);
+  }
+}
+
+/**
+ * Retrieve saved video playback progress from Firestore
+ */
+export async function getVideoPlaybackProgress(
+  userId: string,
+  videoId: string
+): Promise<number | null> {
+  if (!userId || !videoId) return null;
+  try {
+    const docRef = doc(db, "users", userId, "playbackProgress", videoId);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      return typeof data.timestampSeconds === "number" ? data.timestampSeconds : null;
+    }
+    return null;
+  } catch (err) {
+    console.warn("[Firestore] Error fetching playback progress:", err);
+    return null;
+  }
+}
+

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import {
   Home,
   Compass,
@@ -13,7 +13,7 @@ interface MobileBottomNavProps {
   onOpenAIModal?: () => void;
 }
 
-export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
+const MobileBottomNavComponent: React.FC<MobileBottomNavProps> = ({
   currentView,
   onNavigate,
   onOpenAIModal,
@@ -22,7 +22,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     <nav
       id="mobile-bottom-nav"
       aria-label="Mobile Navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-stone-950/95 backdrop-blur-lg border-t border-stone-800/90 pb-safe transition-all shadow-[0_-4px_20px_rgba(0,0,0,0.5)]"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-stone-950/95 backdrop-blur-lg border-t border-stone-800/90 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.5)]"
     >
       <div className="grid grid-cols-5 items-center h-14 px-1">
         {/* Home */}
@@ -96,3 +96,5 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     </nav>
   );
 };
+
+export const MobileBottomNav = memo(MobileBottomNavComponent);

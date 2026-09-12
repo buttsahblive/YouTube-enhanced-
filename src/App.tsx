@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Video } from "./types";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
@@ -198,14 +198,14 @@ export default function App() {
     fetchVideos(selectedCategory, searchQuery);
   }, [selectedCategory]);
 
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     setCurrentView("home");
     fetchVideos(selectedCategory, query);
-  };
+  }, [selectedCategory]);
 
   // Select Video to Play
-  const handleSelectVideo = (video: Video) => {
+  const handleSelectVideo = useCallback((video: Video) => {
     setCurrentVideo(video);
     setCurrentView("player");
     setShowMiniPlayer(false);
@@ -220,18 +220,18 @@ export default function App() {
       saveLibraryItemToFirestore(user.uid, "history", video);
       incrementUserVideoWatchStats(user.uid, video.title, likedVideos.length, watchLater.length);
     }
-  };
+  }, [user?.uid, likedVideos.length, watchLater.length]);
 
   // Clear Watch History locally and in Firestore
-  const handleClearHistory = async () => {
+  const handleClearHistory = useCallback(async () => {
     setHistory([]);
     if (user?.uid) {
       await clearUserLibraryInFirestore(user.uid, "history");
     }
-  };
+  }, [user?.uid]);
 
   // Toggle Like
-  const handleToggleLike = (video: Video, e?: React.MouseEvent) => {
+  const handleToggleLike = useCallback((video: Video, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setLikedVideos((prev) => {
       const exists = prev.some((v) => v.id === video.id);
@@ -243,10 +243,10 @@ export default function App() {
         return [video, ...prev];
       }
     });
-  };
+  }, [user?.uid]);
 
   // Toggle Watch Later
-  const handleToggleWatchLater = (video: Video, e?: React.MouseEvent) => {
+  const handleToggleWatchLater = useCallback((video: Video, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setWatchLater((prev) => {
       const exists = prev.some((v) => v.id === video.id);
@@ -258,7 +258,7 @@ export default function App() {
         return [video, ...prev];
       }
     });
-  };
+  }, [user?.uid]);
 
   // Login handler
   const handleLogin = async () => {
@@ -288,18 +288,22 @@ export default function App() {
   };
 
   // Navigation handler
-  const handleNavigate = (view: typeof currentView) => {
+  const handleNavigate = useCallback((view: typeof currentView) => {
     if (currentView === "player" && view !== "player" && currentVideo) {
       setShowMiniPlayer(true);
     }
     setCurrentView(view);
-  };
+  }, [currentView, currentVideo]);
 
-  const isLiked = (vidId: string) => likedVideos.some((v) => v.id === vidId);
-  const isWatchLater = (vidId: string) => watchLater.some((v) => v.id === vidId);
+  // Instant O(1) set lookups for scroll performance
+  const likedSet = useMemo(() => new Set(likedVideos.map((v) => v.id)), [likedVideos]);
+  const watchLaterSet = useMemo(() => new Set(watchLater.map((v) => v.id)), [watchLater]);
+  const isLiked = useCallback((vidId: string) => likedSet.has(vidId), [likedSet]);
+  const isWatchLater = useCallback((vidId: string) => watchLaterSet.has(vidId), [watchLaterSet]);
+
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col font-sans selection:bg-red-500 selection:text-white">
+    <div className="h-full h-[100dvh] bg-stone-950 text-stone-100 flex flex-col font-sans selection:bg-red-500 selection:text-white overflow-hidden">
       {/* Top Navigation Header */}
       <Header
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -317,7 +321,7 @@ export default function App() {
       />
 
       {/* Main Layout Area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0 min-w-0">
         {/* Left Sidebar */}
         <Sidebar
           isOpen={isSidebarOpen}
@@ -335,7 +339,10 @@ export default function App() {
         />
 
         {/* Dynamic Center Stage */}
-        <main className="flex-1 overflow-y-auto bg-stone-950 flex flex-col pb-20 md:pb-6 touch-momentum">
+        <main
+          id="main-scroll-container"
+          className="flex-1 min-h-0 overflow-y-auto bg-stone-950 flex flex-col pb-24 md:pb-8 touch-momentum"
+        >
           {authError && (
             <div className="w-full max-w-7xl mx-auto px-4 pt-3">
               {authError.includes("unauthorized-domain") ? (
@@ -519,6 +526,7 @@ export default function App() {
               onToggleLike={() => handleToggleLike(currentVideo)}
               isWatchLater={isWatchLater(currentVideo.id)}
               onToggleWatchLater={() => handleToggleWatchLater(currentVideo)}
+              user={user}
             />
           )}
 

@@ -12,7 +12,10 @@ import {
   FolderHeart,
   Video,
   X,
+  Smartphone,
+  ExternalLink,
 } from "lucide-react";
+import { useIsRunningInApp } from "../utils/appDetection";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -37,6 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   historyCount,
   onOpenAIModal,
 }) => {
+  const isRunningInApp = useIsRunningInApp();
   const mainNav = [
     { id: "home", label: "Home", icon: Home },
     { id: "channel", label: "My Channel Studio", icon: Video, highlight: true },
@@ -223,6 +227,42 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </div>
       </div>
+
+      {/* Download Android App (Hidden if already using the app) */}
+      {!isRunningInApp && (
+        <>
+          <div className="my-2 border-t border-stone-800/80" />
+          <div className="px-3">
+            <a
+              id="sidebar-download-app-link"
+              href="https://apkpure.com/p/app.youpro"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                if (onClose) onClose();
+              }}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-emerald-950/40 via-emerald-900/20 to-stone-900 border border-emerald-500/30 hover:border-emerald-500/60 hover:bg-emerald-950/60 transition-all group cursor-pointer shadow-sm"
+              title="Download YouPro Android App APK on APKPure"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Smartphone className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div className="text-left truncate">
+                  <div className="text-xs font-semibold text-white group-hover:text-emerald-300 transition-colors flex items-center gap-1.5">
+                    <span>Download App</span>
+                    <span className="text-[9px] font-bold bg-emerald-500/25 text-emerald-300 px-1 py-0.2 rounded border border-emerald-500/40">
+                      APK
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-stone-400 truncate">Get YouPro for Android</p>
+                </div>
+              </div>
+              <ExternalLink className="w-3.5 h-3.5 text-stone-500 group-hover:text-emerald-400 transition-colors shrink-0 ml-1" />
+            </a>
+          </div>
+        </>
+      )}
 
       {/* Footer Info */}
       <div className="mt-auto px-4 pt-4 pb-2 border-t border-stone-800 text-xs text-stone-500">
